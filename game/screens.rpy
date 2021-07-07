@@ -4,7 +4,6 @@
 
 init offset = -1
 
-
 ################################################################################
 ## Styles
 ################################################################################
@@ -256,7 +255,7 @@ screen quick_menu():
             textbutton _("Back") action Rollback()
             textbutton _("History") action ShowMenu('history')
             textbutton _("Skip") action Skip() alternate Skip(fast=True, confirm=True)
-            textbutton _("Auto") action Preference("auto-forward", "toggle")
+            textbutton _("Phone") action ShowMenu('in_game_phone')
             textbutton _("Save") action ShowMenu('save')
             textbutton _("Q.Save") action QuickSave()
             textbutton _("Q.Load") action QuickLoad()
@@ -871,6 +870,117 @@ style slider_button_text:
 style slider_vbox:
     xsize 675
 
+## In Game Phone Screen ########################################################
+##
+## This is a screen that displays Kai's root Phone Menu to the player.
+
+screen in_game_phone(game_state):
+    tag menu
+
+    zorder 90
+
+    imagemap:
+        idle "game_phone/phone_idle.PNG"
+        hover "game_phone/phone_hover.PNG"
+        ground "game_phone/phone_ground.PNG"
+
+        xalign 0.5
+        yalign 0.5
+
+        if game_state['morning_phone_texts'][0] == 0 or game_state['morning_phone_texts'][1] == 0:
+            hotspot (997, 139, 403, 243) action ShowMenu('phone_messages', game_state) #texts
+        hotspot (1424, 139, 403, 240) action ShowMenu('cachet', game_state) #Cache
+        # hotspot (997, 394, 404, 243) action ShowMenu('save') #
+        if game_state['can_map_travel']:
+            hotspot (1424, 395, 404, 238) action ShowMenu('phone_map', game_state) #Map
+        if game_state['current_location'] == 'park':
+            hotspot (999, 650, 402, 239) action Start('SpikePhotoPark') #BL
+        hotspot (1426, 650, 402, 244) action ShowMenu('preferences') #BR
+        hotspot (1186, 928, 450, 108) action Return() #Back
+
+screen phone_messages(game_state):
+    tag menu
+
+    zorder 90
+
+    imagemap:
+        idle "game_phone/phone_messages_idle.PNG"
+        hover "game_phone/phone_messages_hover.PNG"
+        ground "game_phone/phone_messages_ground.PNG"
+
+        xalign 0.5
+        yalign 0.5
+        
+        if game_state['morning_phone_texts'][1] == 0:
+            hotspot (987, 105, 898, 289) action Start('Spiketextconvo')
+        if game_state['morning_phone_texts'][0] == 0:
+            hotspot (982, 390, 900, 276) action Start('Marlontextconvo')
+        hotspot (1186, 930, 450, 108) action ShowMenu('in_game_phone', game_state)
+
+screen phone_map(game_state):
+    tag menu
+
+    zorder 90
+
+    imagemap:
+        idle "game_phone/phone_map_idle.PNG"
+        hover "game_phone/phone_map_hover.PNG"
+        ground "game_phone/phone_map_ground.PNG"
+        xalign 0.5
+        yalign 0.5
+        if game_state['current_location'] != 'park':
+            hotspot (1473, 545, 73, 62) action Start('parkentrance') 
+        if game_state['current_location'] != 'home':
+            hotspot (1043, 734, 76, 62) action Start('homefornoreason')
+
+## Phone Open Button ###########################################################
+##
+## This is a button that I want to render over the screen!
+
+screen phone_pop_but(game_state):
+    tag menu
+    zorder 85
+
+    imagemap:
+        idle "menus/phone_on_idle.png"
+        hover "menus/phone_on_hover.png"
+        ground "menus/phone_on_ground.png"
+
+        hotspot(16, 2, 164, 175) action ShowMenu('in_game_phone', game_state)
+        xpos 1500
+        ypos 700
+
+screen cachet(game_state):
+    tag menu
+    zorder 90
+
+    imagemap:
+        idle "game_phone/phone_cache_idle.PNG"
+        hover "game_phone/phone_cache_hover.PNG"
+        ground "game_phone/phone_cache_ground.PNG"
+        xalign 0.5
+        yalign 0.5
+    
+        hotspot (1186, 930, 450, 108) action ShowMenu('in_game_phone', game_state)
+        
+    text "Spike Influence: [game_state[spike_friend_score]]" size 40 xalign 0.81 yalign 0.25
+    text "Marlon Influence: [game_state[marlon_friend_score]]" size 40 xalign 0.81 yalign 0.25 yoffset 175
+
+## Maze Progress Trackert ######################################################
+##
+## This is the visual representation of how the duo is doing in the maze
+
+screen maze_tracker(game_state):
+    zorder 70
+
+    text "Fun-o-meter:" xpos 1500 ypos 170 size 25
+
+    bar:
+        value game_state['maze_goods']
+        range 7
+        xpos 1500
+        ypos 200
+        xmaximum 200
 
 ## History screen ##############################################################
 ##
